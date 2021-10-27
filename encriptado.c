@@ -4,23 +4,58 @@
 struct repeticion{
     char letra;
     int repeticiones;
+    struct repeticion *siguiente;
 };
 struct arbol{
-    struct repeticion *info;
-    int costo;
-    struct arbol *izq;
-    struct arbol *der;
+    int costo;//Costo sera el total de la suma de las raices
+    int izq;
+    int der;
+    int padre;
 };
 //Funciones
-struct arbol *crear_arbol(struct repeticion *info, int costo, struct arbol *izq, struct arbol *der);
-struct arbol *insertar_arbol(struct arbol *arbol, struct repeticion *info, int costo);
-struct arbol *ordenar_arbol(struct arbol *arbol);
-void imprimir_arbol(struct arbol *arbol);
-void actualizar_costo(struct arbol *arbol);
+char cadena[100000];
+int cub [256];
+int comparar(const void *, const void *);
+struct repeticion *insertar(struct repeticion *, char,int);
+struct arbol *crearArbol(struct arbol *,struct repeticion *,int);
+void Seleccion (struct arbol *,int,int*,int*);
+int main()
+{
+    int i = 0,n;
+    struct arbol *arbol=NULL;
+    struct repeticion *rep=NULL;
+    scanf("%[^\n]",&cadena);
+    n = strlen(cadena);
+    rep = (struct repeticion *)malloc(sizeof(struct repeticion));
+    for(i=0;i<strlen(cadena);i++)
+    {
+        cub[cadena[i]]=cub[cadena[i]]+1;
+    }
+    for(i=0;i<256;i++)
+    {
+        if(cub[i]!=0)
+        {
+            rep = insertar(rep,i,cub[i]);
+        }
+    }
+    arbol = crearArbol(arbol,rep,n);
+    //qsort(rep,256,sizeof(struct repeticion),comparar);//Ordena menor a mayor
+   /* for(i=0;i<256;i++)
+    {
+        if(rep[i].repeticiones>0)
+        {
+            printf("%c %d\n",rep[i].letra,rep[i].repeticiones);
+        }
+    }*/
+    while (rep->siguiente!=NULL)
+    {
+        printf("%c %d\n",rep->letra,rep->repeticiones);
+        rep = rep->siguiente;
+    }
+    
+    return 0;
+}
 
-struct repeticion rep[256];
-    char cadena[100000];
-    int cub [256];
 int comparar(const void *a, const void *b){
     struct repeticion *x = (struct repeticion *)a;
     struct repeticion *y = (struct repeticion *)b;
@@ -31,95 +66,69 @@ int comparar(const void *a, const void *b){
     else
         return 0;
 }
-int main()
-{
-    int i = 0;
-    struct arbol *arbol=NULL;
-    scanf("%[^\n]",&cadena);
-    for(i=0;i<strlen(cadena);i++)
-    {
-        cub[cadena[i]]=cub[cadena[i]]+1;
-    }
-    for(i=0;i<256;i++)
-    {
-        if(cub[i]!=0)
-        {  
-            rep[i].letra=i;
-            rep[i].repeticiones=cub[i];
-        }
-    }
-    qsort(rep,256,sizeof(struct repeticion),comparar);
-    for (i=0;i<256;i++)
-    {
-        if(rep[i].repeticiones!=0)
-        {
-            arbol=insertar_arbol(arbol,&rep[i],rep[i].repeticiones);
-            arbol = ordenar_arbol(arbol);
-        }
-    }
-    imprimir_arbol(arbol);
-}
-struct arbol *crear_arbol(struct repeticion *info, int costo, struct arbol *izq, struct arbol *der){
-    struct arbol *nuevo=(struct arbol*)malloc(sizeof(struct arbol));
-    nuevo->info=info;
-    nuevo->costo=costo;
-    nuevo->izq=izq;
-    nuevo->der=der;
+struct repeticion *insertar(struct repeticion *rep, char letra,int repeticiones){
+    struct repeticion *nuevo = (struct repeticion *)malloc(sizeof(struct repeticion));
+    nuevo->letra = letra;
+    nuevo->repeticiones = repeticiones;
+    nuevo->siguiente = rep;
     return nuevo;
 }
-struct arbol *insertar_arbol(struct arbol *arbol, struct repeticion *info, int costo){
-    if(arbol==NULL){
-        return crear_arbol(info, costo, NULL, NULL);
+struct arbol *crearArbol(struct arbol *arbol,struct repeticion *rep,int n){
+    if(n<=1) return NULL; //La oracion unicamente es de un caracter
+    int m,aux,auux,*aux1 = &aux, *aux2 = &auux;
+    m = 2*n-1; //Nodos del arbol
+    arbol = (struct arbol *)malloc(sizeof(struct arbol));
+    for(int i=0;i<m;i++)
+    {
+        arbol[i].izq = 0;
+        arbol[i].der = 0;
+        arbol -> costo = 0;
+        arbol->padre = 0;
     }
-    if(costo<arbol->costo){
-        arbol->izq=insertar_arbol(arbol->izq, info, costo);
-    }else{
-        arbol->der=insertar_arbol(arbol->der, info, costo);
+    for(int i = 0 ; i<n; i++)
+    {
+        arbol[i].costo =rep[i].repeticiones;
+    }
+    //For que vaya de la cabecera a la ultima hoja
+    for(int i = n; i<m; i++)
+    {
+        //Seleccionar los nodos con mas bajo costo
+        Seleccion(arbol,i-1,aux1,aux2);
+        arbol[aux].padre = i;
+        arbol[auux].padre = i;
+        arbol[i].izq = aux;
+        arbol[i].der = auux;
+        arbol[i].costo = arbol[aux].costo + arbol[auux].costo;
+        printf("%d\n",arbol[i].costo);
     }
     return arbol;
 }
-//Actualizar costo sumando los costos actuales de los hijos
-void actualizar_costo(struct arbol *arbol){
-    if(arbol==NULL){
-        return;
-    }
-    if(arbol->izq!=NULL){
-        arbol->costo+=arbol->izq->costo;
-    }
-    if(arbol->der!=NULL){
-        arbol->costo+=arbol->der->costo;
-    }
-    actualizar_costo(arbol->izq);
-    actualizar_costo(arbol->der);
-}
-
-//ordenamiento por costo
-struct arbol *ordenar_arbol(struct arbol *arbol){
-    if(arbol==NULL){
-        return NULL;
-    }
-    //actualizar_costo(arbol);
-    if(arbol->izq!=NULL){
-        arbol->izq=ordenar_arbol(arbol->izq);
-    }
-    if(arbol->der!=NULL){
-        arbol->der=ordenar_arbol(arbol->der);
-    }
-    if(arbol->izq!=NULL && arbol->der!=NULL){
-        if(arbol->izq->costo>arbol->der->costo){
-            struct arbol *aux=arbol->izq;
-            arbol->izq=arbol->der;
-            arbol->der=aux;
+void Seleccion(struct arbol *arbol,int n,int *aux1,int *aux2)
+{
+    int i,maxi,mini;
+    *aux1 = 0;
+    *aux2 = 0;
+    maxi = 0;
+    for(i=0;i<n;i++)
+    {
+        if(arbol[*aux1].costo > arbol[i].costo && arbol[i].padre == 0)
+        {
+            *aux1 = i;
+        }
+        if(arbol[maxi].costo < arbol[i].costo && arbol[i].padre == 0)
+        {
+            maxi = i;
         }
     }
-    return arbol;
-}
-//imprimir arbol en inorden
-void imprimir_arbol(struct arbol *arbol){
-    if(arbol==NULL){
-        return;
+    mini = arbol[*aux1].costo;
+    arbol[*aux1].costo = arbol[maxi].costo;
+    for(int i=0;i<n;i++)
+    {
+        if(arbol[*aux2].costo > arbol[i].costo && arbol[i].padre == 0)
+        {
+            *aux2 = i;
+        }
     }
-    imprimir_arbol(arbol->izq);
-    printf("%c %d\n",arbol->info->letra,arbol->costo);
-    imprimir_arbol(arbol->der);
+    arbol[*aux1].costo = mini;
+    printf("Costos minimos %d %d\n",*aux1,*aux2);
 }
