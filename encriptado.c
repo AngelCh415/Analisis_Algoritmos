@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+
 struct repeticion{
     char letra;
     int repeticiones;
@@ -21,10 +22,13 @@ struct arbol *crearArbol(struct arbol *,struct repeticion *,int);
 void Seleccion (struct arbol *,int,int*,int*);
 int main()
 {
+
     int i = 0,n;
+    char c;
     struct arbol *arbol=NULL;
     struct repeticion *rep=NULL;
     scanf("%[^\n]",&cadena);
+    //scanf("%*[^\n]%*c");
     n = strlen(cadena);
     rep = (struct repeticion *)malloc(sizeof(struct repeticion));
     for(i=0;i<strlen(cadena);i++)
@@ -40,19 +44,18 @@ int main()
     }
     arbol = crearArbol(arbol,rep,n);
     //qsort(rep,256,sizeof(struct repeticion),comparar);//Ordena menor a mayor
-   /* for(i=0;i<256;i++)
+/* for(i=0;i<256;i++)
     {
         if(rep[i].repeticiones>0)
         {
             printf("%c %d\n",rep[i].letra,rep[i].repeticiones);
         }
     }*/
-    while (rep->siguiente!=NULL)
+    while (rep->siguiente->siguiente!=NULL)
     {
         printf("%c %d\n",rep->letra,rep->repeticiones);
         rep = rep->siguiente;
     }
-    
     return 0;
 }
 
@@ -77,12 +80,11 @@ struct arbol *crearArbol(struct arbol *arbol,struct repeticion *rep,int n){
     if(n<=1) return NULL; //La oracion unicamente es de un caracter
     int m,aux,auux,*aux1 = &aux, *aux2 = &auux;
     m = 2*n-1; //Nodos del arbol
-    arbol = (struct arbol *)malloc(sizeof(struct arbol));
+    arbol = (struct arbol *)malloc(sizeof(struct arbol)*(m+1));
     for(int i=0;i<m;i++)
     {
         arbol[i].izq = 0;
         arbol[i].der = 0;
-        arbol -> costo = 0;
         arbol->padre = 0;
     }
     for(int i = 0 ; i<n; i++)
@@ -90,16 +92,19 @@ struct arbol *crearArbol(struct arbol *arbol,struct repeticion *rep,int n){
         arbol[i].costo =rep[i].repeticiones;
     }
     //For que vaya de la cabecera a la ultima hoja
-    for(int i = n; i<m; i++)
+    while(n>1)
     {
-        //Seleccionar los nodos con mas bajo costo
-        Seleccion(arbol,i-1,aux1,aux2);
-        arbol[aux].padre = i;
-        arbol[auux].padre = i;
-        arbol[i].izq = aux;
-        arbol[i].der = auux;
-        arbol[i].costo = arbol[aux].costo + arbol[auux].costo;
-        printf("%d\n",arbol[i].costo);
+        for(int i=0;i<n-1;i++)
+        {
+            Seleccion(arbol,n,aux1,aux2);
+            arbol[aux].padre = i;
+            arbol[auux].padre = i;
+            arbol[i].izq = aux;
+            arbol[i].der = auux;
+            arbol[i].costo = arbol[aux].costo + arbol[auux].costo;
+            printf("Costo: %d\n",arbol[i].costo);
+        }
+        n--;
     }
     return arbol;
 }
@@ -130,5 +135,5 @@ void Seleccion(struct arbol *arbol,int n,int *aux1,int *aux2)
         }
     }
     arbol[*aux1].costo = mini;
-    printf("Costos minimos %d %d\n",*aux1,*aux2);
+    printf("Costos minimos %d %d\n",arbol[*aux1].costo,arbol[*aux2].costo);
 }
