@@ -20,13 +20,13 @@ nodo * crear_Cola(char letra, int repeticiones, nodo * izq, nodo *der){
         nuevo->der=der;
         return nuevo;
 }
-void insertar_Cola(nodo **cabecera,char data, int prioridad){
+void insertar_Cola(nodo **cabecera,char data, int prioridad, nodo *izq, nodo *der){
     if((*cabecera)==NULL){
-        (*cabecera)=crear_Cola(data,prioridad,NULL,NULL);
+        (*cabecera)=crear_Cola(data,prioridad,izq,der);
     }
     else{
         nodo * ini = (*cabecera);
-        nodo * aux = crear_Cola(data, prioridad,NULL,NULL);
+        nodo * aux = crear_Cola(data, prioridad,izq,der);
         if((*cabecera)->repeticiones > prioridad){
             aux -> siguiente = (*cabecera);
             (*cabecera) = aux;
@@ -59,25 +59,13 @@ int peek2(nodo** head)
 {
     return (*head)->repeticiones;
 }
-
-void crear_Arbol(nodo **cabecera, int repeticion_total, nodo *izq, nodo *der){
-    (*cabecera) -> izq = izq;
-    (*cabecera) -> der = der;
-    (*cabecera) -> repeticiones = repeticion_total;
-
-}
-void insertar_Cola_combinada (nodo **cabecera,nodo *a, nodo *b){
-    printf("%c: %d\n",a->letra,a->repeticiones);
-    printf("%c: %d\n",b->letra,b->repeticiones);
-    int prio = a->repeticiones + b->repeticiones;
-    printf("%d\n",prio);
-    if(a->repeticiones < b->repeticiones){
-        crear_Arbol(cabecera,prio,a,b);
-    }else{
-        crear_Arbol(cabecera,prio,b,a);
+void imprimirArbol(nodo *arbol){
+    if(arbol!=NULL){
+        printf("%c",arbol->letra);
+        imprimirArbol(arbol->izq);
+        imprimirArbol(arbol->der);
     }
 }
-
 int main()
 {
     nodo *cola=NULL, *arbolHuff;
@@ -92,27 +80,32 @@ int main()
     {
         if(cub[i]!=0)
         {
-            insertar_Cola(&cola,i,cub[i]);
+            insertar_Cola(&cola,i,cub[i],NULL,NULL);
             lc=lc+1;
         }
     }
     while(lc>1){
-        nodo *a = top(cola);
-        printf("%c: %d\n",a->letra,a->repeticiones);
+        nodo *a = cola;
+        int auxa=peek2(&a);
         pop(&cola);
         lc --;
         nodo *b = cola;
-        printf("%c: %d\n",b->letra,b->repeticiones);
+        int auxb=peek2(&b);
         pop(&cola);
         lc--;
-        insertar_Cola_combinada(&cola,a,b);
+        int prio = 0;
+        prio = auxa+auxb;
+        if(a->repeticiones < b->repeticiones){
+            insertar_Cola(&cola,'\0',prio,a,b);
+        }else{
+            insertar_Cola(&cola,'\0',prio,b,a);
+        }
         lc++;
     }
     arbolHuff = cola;
-    /*while (!isEmpty(&cola)) {
-        printf("%c: %d\n", peek(&cola), peek2(&cola));
-        pop(&cola);
-    }*/
+    printf("%c: %d\n",arbolHuff->letra,arbolHuff->repeticiones);
+    printf("%c: %d\n",arbolHuff->izq->letra,arbolHuff->izq->repeticiones);
+    printf("%c: %d",arbolHuff->der->letra,arbolHuff->der->repeticiones);
     return 0;
 }
 /*
