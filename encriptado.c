@@ -11,22 +11,22 @@ typedef struct arbol {
 //Funciones
 char cadena[100000];
 int cub [256];
-nodo * crear_Cola(char letra, int repeticiones){
+nodo * crear_Cola(char letra, int repeticiones, nodo * izq, nodo *der){
         struct arbol *nuevo=(struct arbol*)malloc(sizeof(struct arbol));
         nuevo->letra=letra;
         nuevo->repeticiones=repeticiones;
         nuevo->siguiente=NULL;
-        nuevo->izq=NULL;
-        nuevo->der=NULL;
+        nuevo->izq=izq;
+        nuevo->der=der;
         return nuevo;
 }
 void insertar_Cola(nodo **cabecera,char data, int prioridad){
     if((*cabecera)==NULL){
-        (*cabecera)=crear_Cola(data,prioridad);
+        (*cabecera)=crear_Cola(data,prioridad,NULL,NULL);
     }
     else{
         nodo * ini = (*cabecera);
-        nodo * aux = crear_Cola(data, prioridad);
+        nodo * aux = crear_Cola(data, prioridad,NULL,NULL);
         if((*cabecera)->repeticiones > prioridad){
             aux -> siguiente = (*cabecera);
             (*cabecera) = aux;
@@ -39,6 +39,7 @@ void insertar_Cola(nodo **cabecera,char data, int prioridad){
     }
     }
 }
+//Saca el caracter
 int peek(nodo** head)
 {
     return (*head)->letra;
@@ -53,14 +54,34 @@ void pop(nodo** head)
     (*head) = (*head)->siguiente;
     free(temp);
 }
+//Saca el costo/prioridad
 int peek2(nodo** head)
 {
     return (*head)->repeticiones;
 }
+
+void crear_Arbol(nodo **cabecera, int repeticion_total, nodo *izq, nodo *der){
+    (*cabecera) -> izq = izq;
+    (*cabecera) -> der = der;
+    (*cabecera) -> repeticiones = repeticion_total;
+
+}
+void insertar_Cola_combinada (nodo **cabecera,nodo *a, nodo *b){
+    printf("%c: %d\n",a->letra,a->repeticiones);
+    printf("%c: %d\n",b->letra,b->repeticiones);
+    int prio = a->repeticiones + b->repeticiones;
+    printf("%d\n",prio);
+    if(a->repeticiones < b->repeticiones){
+        crear_Arbol(cabecera,prio,a,b);
+    }else{
+        crear_Arbol(cabecera,prio,b,a);
+    }
+}
+
 int main()
 {
-    nodo *cola=NULL;
-    int i = 0,n;
+    nodo *cola=NULL, *arbolHuff;
+    int i = 0,n,lc=0;
     scanf("%[^\n]",&cadena);
     n = strlen(cadena);
     for(i=0;i<strlen(cadena);i++)
@@ -72,12 +93,26 @@ int main()
         if(cub[i]!=0)
         {
             insertar_Cola(&cola,i,cub[i]);
+            lc=lc+1;
         }
     }
-    while (!isEmpty(&cola)) {
+    while(lc>1){
+        nodo *a = top(cola);
+        printf("%c: %d\n",a->letra,a->repeticiones);
+        pop(&cola);
+        lc --;
+        nodo *b = cola;
+        printf("%c: %d\n",b->letra,b->repeticiones);
+        pop(&cola);
+        lc--;
+        insertar_Cola_combinada(&cola,a,b);
+        lc++;
+    }
+    arbolHuff = cola;
+    /*while (!isEmpty(&cola)) {
         printf("%c: %d\n", peek(&cola), peek2(&cola));
         pop(&cola);
-    }
+    }*/
     return 0;
 }
 /*
