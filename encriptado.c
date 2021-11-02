@@ -8,9 +8,12 @@ typedef struct arbol {
     struct arbol *der;
     struct arbol *siguiente;
 }nodo;
+
 //Funciones
 char cadena[100000];
 int cub [256];
+char frec [256];
+
 nodo * crear_Cola(char letra, int repeticiones, nodo * izq, nodo *der){
         struct arbol *nuevo=(struct arbol*)malloc(sizeof(struct arbol));
         nuevo->letra=letra;
@@ -59,13 +62,27 @@ int peek2(nodo** head)
 {
     return (*head)->repeticiones;
 }
-void imprimirArbol(nodo *arbol){
-    if(arbol!=NULL){
-        printf("%c",arbol->letra);
-        imprimirArbol(arbol->izq);
-        imprimirArbol(arbol->der);
+/*void guardarcodigos(nodo* head, char recorrido[]){
+    if(head==NULL){
+        return;
     }
+    if(head->letra !='$'){
+        frec[head->letra] = (char *)recorrido;
+    } 
+    guardarcodigos(head->izq, recorrido + '0');
+    guardarcodigos(head->der, recorrido + '1');
+}*/
+void imprimirArbol(nodo* head){
+    if(head==NULL){
+        return;
+    }
+    if(head->letra !='$'){
+        printf("%c: %d",head->letra, head->repeticiones);
+    } 
+    imprimirArbol(head->izq);
+    imprimirArbol(head->der);
 }
+    
 int main()
 {
     nodo *cola=NULL, *arbolHuff;
@@ -75,6 +92,13 @@ int main()
     for(i=0;i<strlen(cadena);i++)
     {
         cub[cadena[i]]=cub[cadena[i]]+1;
+    }
+    for (i=0;i<256;i++)
+    {
+        if(cub[i]!=0)
+        {
+            printf("%c: %d\n",i,cub[i]);
+        }
     }
     for(i=0;i<256;i++)
     {
@@ -95,38 +119,10 @@ int main()
         lc--;
         int prio = 0;
         prio = auxa+auxb;
-        if(a->repeticiones < b->repeticiones){
-            insertar_Cola(&cola,'\0',prio,a,b);
-        }else{
-            insertar_Cola(&cola,'\0',prio,b,a);
-        }
+        insertar_Cola(&cola, '$',prio,a,b);
         lc++;
     }
     arbolHuff = cola;
-    printf("%c: %d\n",arbolHuff->letra,arbolHuff->repeticiones);
-    printf("%c: %d\n",arbolHuff->izq->letra,arbolHuff->izq->repeticiones);
-    printf("%c: %d",arbolHuff->der->letra,arbolHuff->der->repeticiones);
+    imprimirArbol(arbolHuff);
     return 0;
 }
-/*
-#include<bits/stdc++.h>
-using namespace std;
-int main() {
-    priority_queue<arbol> pq;
-
-    vector<arbol> v;
-
-    for(arbol i: v){
-        pq.push(i);
-    }
-    while (pq.size()>1) {
-        arbol a = pq.top();
-        pq.pop();
-        arbol b = pq.top();
-        pq.pop();
-        pq.push(combina(a,b));
-    }
-    arbol final = pq.top();
-    return 0;
-}
-*/
