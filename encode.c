@@ -152,11 +152,11 @@ struct hoja* HuffmanTree(struct hoja ** hojas, int tama)
 
 void printCodes(struct hoja* root, int lon,int top)
 {
-	if (root->der) {
-		printCodes(root->der, lon *2, top + 1);
-	}
 	if (root->izq) {
 		printCodes(root->izq, lon *2+1, top + 1);
+	}
+	if (root->der) {
+		printCodes(root->der, lon *2, top + 1);
 	}
 	if (root->izq == NULL && root->der == NULL) {
 		printf("%c:%d ", root->letra,lon);
@@ -182,6 +182,18 @@ char * decToBin(int num, int n)
 {
 	char *bin = (char *)malloc(sizeof(char) * n);
 	int i = 0;
+	if(num == 0)
+	{
+		return  "0";
+	}
+	if(num == 1)
+	{
+		return "1";
+	}
+	if(num == 2)
+	{
+		return "10";
+	}
 	while (num != 0) {
 		bin[i++] = (num & 1) + '0';
 		num = num >> 1;
@@ -190,39 +202,49 @@ char * decToBin(int num, int n)
 		bin[i++] = '0';
 	return reversestring(bin, n);
 }
+struct tabla{
+	char letra;
+	unsigned char **binario;
+};
+
 void codificar(struct hoja* root,int tama)
 {
-	int aux = 10000000,recorrido = 8;//1<<7
+	int recorrido = 8;
 	unsigned char ans = 0;
-	char *arreB;
+	char *arreB,*res;
+	struct tabla *tabla = (struct tabla*)malloc(sizeof(struct tabla));
 	printf("Codificando\n");
 	for(int i = 0; i < tama; i++){
 		arreB= decToBin(codigos[cara[i]][0], codigos[cara[i]][1]);
-		int tamrepe = codigos[cara[i]][1];//r - 1 , o - 2
-		printf("\n");
-		printf("%c: Valor decimal %d, Codigo Binario ", cara[i],codigos[cara[i]][0]);
-		for(int j = 0; j < tamrepe; j++){
-			printf("%c",arreB[j]);
-			if(arreB[j] == '1'){
-				ans = ans | recorrido;
-			}
-			recorrido = recorrido >> 1;
-			if(recorrido == 0){
-				//se meteria a un archivo
-				
-				recorrido = 8;
-				ans=0;
-			}
+		tabla->letra = cara[i];
+		tabla->binario[cara[i]] = arreB;
+		printf("%c:%s\n", tabla->letra , tabla->binario[cara[i]]);
+		}
+	for(int i = 0; i < strlen(cadena); i++){
+		for(int j = 0; j < codigos[cadena[i]][1]; j++){
+			//printf("%c", tabla->binario[cadena[i]][j]);
+			res = res + tabla->binario[cadena[i]][j];
+			recorrido--;
 		}
 	}
-	
+	// Si la longitud de res > 8 entonces divides la cadena en los primeros 8 elementos y compruebas de nuevo
+	if(recorrido <=0){
+		int i = 0;
+		for(i = 0; i <8; i++){
+			printf("%c", res[i]);
+		}
+		printf(" ");
+		for(i = 8; i < strlen(res); i++){
+			printf("%c", res[i]);
+		}
+	}
+	else printf("%s\n",res);
 }
 void HuffmanCodes(nodo ** hojas, int tama)
 {
 	struct hoja* root= HuffmanTree(hojas, tama);
 	int arr=0, top = 0;
 	printCodes(root, arr, top);
-
 	/*
 	abc
 	a: 1
