@@ -212,6 +212,7 @@ void codificar(struct hoja* root,int tama)
 	int recorrido = 8;
 	unsigned char ans = 0;
 	char *arreB,*res;
+	char buffer[100];
 	struct tabla *tabla = (struct tabla*)malloc(sizeof(struct tabla));
 	printf("Codificando\n");
 	for(int i = 0; i < tama; i++){
@@ -222,8 +223,8 @@ void codificar(struct hoja* root,int tama)
 		}
 	for(int i = 0; i < strlen(cadena); i++){
 		for(int j = 0; j < codigos[cadena[i]][1]; j++){
-			//printf("%c", tabla->binario[cadena[i]][j]);
-			res = res + tabla->binario[cadena[i]][j];
+			printf("%c", tabla->binario[cadena[i]][j]);
+			strcat(strcpy(buffer, res), tabla->binario[cadena[i]][j]);
 			recorrido--;
 		}
 	}
@@ -238,7 +239,8 @@ void codificar(struct hoja* root,int tama)
 			printf("%c", res[i]);
 		}
 	}
-	else printf("%s\n",res);
+	else
+	printf("%s\n",res);
 }
 void HuffmanCodes(nodo ** hojas, int tama)
 {
